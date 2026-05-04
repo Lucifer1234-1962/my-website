@@ -1,0 +1,317 @@
+/* =====================================================
+   style.css  —  EngiPDF Engineering Notes Website
+   ===================================================== */
+
+/* ── Variables ────────────────────────────────────────── */
+:root {
+    --bg:         #0e1117;
+    --surface:    #181c27;
+    --surface2:   #20263a;
+    --border:     #2a3050;
+    --accent:     #4e9af1;
+    --accent2:    #2f78d4;
+    --text:       #e4e8f0;
+    --muted:      #8892aa;
+    --green:      #3ddc84;
+    --red:        #ff5f5f;
+    --radius:     10px;
+    --gap:        1.4rem;
+    --font:       'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ── Reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 1rem;
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { line-height: 1.3; }
+
+/* ── Navbar ───────────────────────────────────────────── */
+.navbar {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.nav-brand {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.nav-links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+.nav-links a {
+    display: inline-block;
+    padding: 0.35rem 0.8rem;
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+}
+.nav-links a:hover,
+.nav-links a.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* ── Layout ───────────────────────────────────────────── */
+.container {
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    flex: 1;
+}
+.page-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 1rem;
+    margin-bottom: 1.8rem;
+}
+.page-header h1 { font-size: 1.8rem; margin-bottom: 0.2rem; }
+.page-header p  { color: var(--muted); }
+.top-action { text-align: right; margin-bottom: 1.2rem; }
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero { text-align: center; padding: 2.5rem 1rem 2rem; }
+.hero-title { font-size: 2.4rem; margin-bottom: 0.6rem; }
+.hero-subtitle { color: var(--muted); max-width: 500px; margin: 0 auto; }
+.accent { color: var(--accent); }
+
+/* ── Stat cards ───────────────────────────────────────── */
+.stats-row {
+    display: flex;
+    gap: var(--gap);
+    justify-content: center;
+    margin: 1.5rem 0 2rem;
+    flex-wrap: wrap;
+}
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem 2.5rem;
+    text-align: center;
+}
+.stat-icon   { font-size: 2rem; }
+.stat-number { font-size: 2.4rem; font-weight: 700; color: var(--accent); }
+.stat-label  { color: var(--muted); font-size: 0.88rem; }
+
+/* ── Feature cards ────────────────────────────────────── */
+.cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--gap);
+}
+.feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.feature-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.feature-card h2 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+.feature-card p  { font-size: 0.88rem; color: var(--muted); margin-bottom: 0.9rem; }
+
+/* ── Buttons ──────────────────────────────────────────── */
+.btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    font-size: 0.92rem;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none;
+}
+.btn:hover { background: var(--accent2); text-decoration: none; transform: translateY(-1px); }
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+.btn-outline:hover { background: var(--accent); color: #fff; }
+.btn-large { padding: 0.7rem 1.6rem; font-size: 0.98rem; margin-top: 0.8rem; }
+.btn-block { display: block; width: 100%; text-align: center; }
+
+/* ── Forms ────────────────────────────────────────────── */
+.form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    max-width: 660px;
+}
+.form-group { margin-bottom: 1.2rem; }
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    font-size: 0.93rem;
+}
+.form-group input[type="text"],
+.form-group input[type="file"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.94rem;
+    transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+.hint { display: block; color: var(--muted); font-size: 0.82rem; margin-top: 0.3rem; }
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+
+/* ── Notes list ───────────────────────────────────────── */
+.note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    transition: border-color 0.2s;
+}
+.note-card:hover { border-color: var(--accent); }
+.note-left { display: flex; align-items: center; gap: 1rem; }
+.pdf-icon { font-size: 2rem; }
+.note-id       { font-size: 0.75rem; color: var(--muted); }
+.note-title    { font-size: 1.05rem; font-weight: 600; }
+.note-filename { font-size: 0.8rem; color: var(--muted); }
+.note-actions  { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Quiz ─────────────────────────────────────────────── */
+.quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 1rem;
+}
+.quiz-question { font-weight: 600; margin-bottom: 0.9rem; font-size: 1rem; }
+.q-num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    margin-right: 0.4rem;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.55rem 0.9rem;
+    cursor: pointer;
+    font-size: 0.93rem;
+    transition: border-color 0.15s;
+}
+.option-label:hover { border-color: var(--accent); }
+.option-label input[type="radio"] { accent-color: var(--accent); }
+.option-letter { font-weight: 700; color: var(--accent); min-width: 1rem; }
+
+/* ── Score card ───────────────────────────────────────── */
+.score-card {
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    border: 2px solid;
+}
+.score-pass { background: #0e2b1a; border-color: var(--green); }
+.score-fail { background: #2b0e0e; border-color: var(--red);   }
+.score-big     { font-size: 2.8rem; font-weight: 700; }
+.score-percent { font-size: 1.4rem; opacity: 0.8; }
+.score-msg     { font-size: 1rem; margin-top: 0.4rem; }
+.results-heading { font-size: 1.15rem; margin-bottom: 0.8rem; }
+.result-item {
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.55rem;
+    border-left: 4px solid;
+}
+.result-correct { background: #0e2218; border-color: var(--green); }
+.result-wrong   { background: #2b1010; border-color: var(--red);   }
+.result-q { margin-bottom: 0.2rem; }
+.retake-row { text-align: center; margin-top: 1.5rem; }
+
+/* ── Alerts ───────────────────────────────────────────── */
+.alert {
+    padding: 0.8rem 1.1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.3rem;
+    font-size: 0.94rem;
+}
+.alert-success { background: #0e2218; border: 1px solid var(--green); color: #80ffb8; }
+.alert-error   { background: #2b0e0e; border: 1px solid var(--red);   color: #ffaaaa; }
+
+/* ── Empty state ──────────────────────────────────────── */
+.empty-state { text-align: center; padding: 3.5rem 1rem; }
+.empty-icon  { font-size: 3.5rem; margin-bottom: 0.8rem; }
+.empty-state h2 { margin-bottom: 0.4rem; }
+.empty-state p  { color: var(--muted); margin-bottom: 1rem; }
+
+/* ── Footer ───────────────────────────────────────────── */
+.footer {
+    text-align: center;
+    padding: 1.1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.83rem;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 540px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .hero-title   { font-size: 1.8rem; }
+    .note-card    { flex-direction: column; align-items: flex-start; }
+    .navbar       { padding: 0.6rem 1rem; }
+    .nav-links a  { padding: 0.3rem 0.55rem; font-size: 0.82rem; }
+}
