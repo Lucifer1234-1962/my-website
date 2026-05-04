@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Take Quiz | EngiPDF{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>🧠 Take the Quiz</h1>
+    <p>Answer every question, then click Submit to see your score.</p>
+</div>
+
+{% if quizzes | length == 0 %}
+
+<div class="empty-state">
+    <div class="empty-icon">🤔</div>
+    <h2>No quiz questions yet!</h2>
+    <p>Add some questions before taking the quiz.</p>
+    <a href="{{ url_for('add_quiz') }}" class="btn">Add a Question</a>
+</div>
+
+{% elif score is not none %}
+
+    {% set percent = (score / total * 100) | int %}
+
+    <div class="score-card {{ 'score-pass' if percent >= 70 else 'score-fail' }}">
+        <div class="score-big">{{ score }} / {{ total }}</div>
+        <div class="score-percent">{{ percent }}%</div>
+        <div class="score-msg">
+            {% if percent == 100 %}🎉 Perfect score!
+            {% elif percent >= 70 %}👍 Great job!
+            {% elif percent >= 40 %}📖 Keep studying!
+            {% else %}💪 Review the notes and try again!
+            {% endif %}
+        </div>
+    </div>
+
+    <h2 class="results-heading">Question Breakdown</h2>
+    {% for r in results %}
+    <div class="result-item {{ 'result-correct' if r.is_correct else 'result-wrong' }}">
+        <p class="result-q"><strong>Q{{ loop.index }}:</strong> {{ r.question }}</p>
+        <p>
+            Your answer: <strong>{{ r.user_ans }}</strong>
+            {% if not r.is_correct %}
+            &nbsp;|&nbsp; Correct: <strong>{{ r.correct }}</strong> — {{ r.options[r.correct] }}
+            {% else %}
+            ✅
+            {% endif %}
+        </p>
+    </div>
+    {% endfor %}
+
+    <div class="retake-row">
+        <a href="{{ url_for('take_quiz') }}" class="btn btn-large">🔄 Try Again</a>
+    </div>
+
+{% else %}
+
+<form method="POST" action="{{ url_for('take_quiz') }}">
+    {% for q in quizzes %}
+    <div class="quiz-card">
+        <p class="quiz-question">
+            <span class="q-num">Q{{ loop.index }}</span> {{ q.question }}
+        </p>
+        <div class="quiz-options">
+            {% for letter, text in q.options.items() %}
+            <label class="option-label">
+                <input type="radio" name="answer_{{ q.id }}" value="{{ letter }}" required>
+                <span class="option-letter">{{ letter }}</span>{{ text }}
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-large btn-block">🏁 Submit Quiz</button>
+</form>
+
+{% endif %}
+
+{% endblock %}
