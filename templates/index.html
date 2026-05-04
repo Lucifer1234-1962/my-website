@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Home | EngiPDF{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <h1 class="hero-title">Welcome to <span class="accent">EngiPDF</span></h1>
+    <p class="hero-subtitle">
+        Upload PDF notes, browse class resources, and test your knowledge with quizzes.
+    </p>
+</section>
+
+<section class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon">📄</div>
+        <div class="stat-number">{{ note_count }}</div>
+        <div class="stat-label">PDFs Uploaded</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🧠</div>
+        <div class="stat-number">{{ quiz_count }}</div>
+        <div class="stat-label">Quiz Questions</div>
+    </div>
+</section>
+
+<section class="cards-row">
+    <div class="feature-card">
+        <div class="card-icon">📤</div>
+        <h2>Upload a Note</h2>
+        <p>Share a PDF with your classmates — enter a title and choose a file.</p>
+        <a href="{{ url_for('upload_notes') }}" class="btn">Upload PDF →</a>
+    </div>
+    <div class="feature-card">
+        <div class="card-icon">📚</div>
+        <h2>Browse Notes</h2>
+        <p>View and download all PDFs shared by the class.</p>
+        <a href="{{ url_for('view_notes') }}" class="btn">View Notes →</a>
+    </div>
+    <div class="feature-card">
+        <div class="card-icon">➕</div>
+        <h2>Create a Quiz</h2>
+        <p>Add multiple-choice questions to test your peers.</p>
+        <a href="{{ url_for('add_quiz') }}" class="btn">Add Question →</a>
+    </div>
+    <div class="feature-card">
+        <div class="card-icon">🏆</div>
+        <h2>Take the Quiz</h2>
+        <p>Answer all questions and see your instant score.</p>
+        <a href="{{ url_for('take_quiz') }}" class="btn">Start Quiz →</a>
+    </div>
+</section>
+
+{% endblock %}
