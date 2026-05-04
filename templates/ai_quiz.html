@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% block title %}AI Quiz | EngiPDF{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>🤖 AI Quiz Generator</h1>
+    <p>Pick a topic and difficulty — Claude will instantly generate quiz questions for you.</p>
+</div>
+
+<div class="alert alert-info">
+    ℹ️ This uses the Claude AI API. Get a free key at
+    <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+</div>
+
+<div id="screen-setup">
+    <div class="form-card" style="margin-bottom:1.2rem;">
+        <div class="form-group" style="margin-bottom:0;">
+            <label for="api-key">Your Claude API Key</label>
+            <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off">
+            <small class="hint">Used only in your browser — never sent to our server.</small>
+        </div>
+    </div>
+    <div class="form-card">
+        <p class="slabel">Choose a topic</p>
+        <div class="topic-grid">
+            <button class="topic-btn" data-topic="Thermodynamics">🔥 Thermodynamics</button>
+            <button class="topic-btn" data-topic="Electric Circuits">⚡ Electric Circuits</button>
+            <button class="topic-btn" data-topic="Engineering Mechanics">⚙️ Mechanics</button>
+            <button class="topic-btn" data-topic="Fluid Mechanics">💧 Fluid Mechanics</button>
+            <button class="topic-btn" data-topic="Materials Science">🧱 Materials Science</button>
+            <button class="topic-btn" data-topic="Engineering Mathematics">📐 Mathematics</button>
+            <button class="topic-btn" data-topic="Programming Basics">💻 Programming</button>
+            <button class="topic-btn" data-topic="Engineering Chemistry">🧪 Chemistry</button>
+        </div>
+        <div class="form-group" style="margin-top:1rem;">
+            <label for="custom-topic">Or type your own topic</label>
+            <input type="text" id="custom-topic" placeholder="e.g. Renewable Energy, Control Systems...">
+        </div>
+        <div class="two-col">
+            <div>
+                <p class="slabel">Difficulty</p>
+                <div class="diff-row">
+                    <button class="diff-btn active" data-diff="Easy">Easy</button>
+                    <button class="diff-btn" data-diff="Medium">Medium</button>
+                    <button class="diff-btn" data-diff="Hard">Hard</button>
+                </div>
+            </div>
+            <div>
+                <p class="slabel">Questions: <span id="num-label">5</span></p>
+                <input type="range" id="num-range" min="3" max="10" value="5" step="1" style="width:100%;">
+                <div class="range-labels"><span>3</span><span>10</span></div>
+            </div>
+        </div>
+        <div id="setup-error" class="alert alert-error" style="display:none; margin-top:1rem;"></div>
+        <button class="btn btn-large" onclick="generateQuiz()" style="width:100%; margin-top:1rem;">✨ Generate Quiz</button>
+    </div>
+</div>
+
+<div id="screen-loading" style="display:none; text-align:center; padding:4rem 1rem;">
+    <div class="dots-loader"><span></span><span></span><span></span></div>
+    <p id="loading-msg" style="font-size:1.1rem; font-weight:500; color:var(--text);">Generating questions...</p>
+    <p id="loading-sub" style="font-size:0.9rem; color:var(--muted); margin-top:0.4rem;"></p>
+</div>
+
+<div id="screen-quiz" style="display:none;">
+    <div class="quiz-meta">
+        <span id="qlabel-topic" class="quiz-badge"></span>
+        <span id="qlabel-diff"  class="quiz-badge"></span>
+        <span id="qlabel-prog"  class="quiz-muted"></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="quiz-card">
+        <p class="quiz-q-num" id="q-num-label"></p>
+        <p class="quiz-question" id="q-text"></p>
+    </div>
+    <div id="options-container"></div>
+    <div class="quiz-nav">
+        <button class="btn btn-outline" id="prev-btn" onclick="prevQ()">← Previous</button>
+        <button class="btn" id="next-btn" onclick="nextQ()">Next →</button>
+    </div>
+    <div class="dot-nav" id="dot-nav"></div>
+</div>
+
+<div id="screen-result" style="display:none;">
+    <div class="score-card" id="score-card">
+        <div id="score-emoji" style="font-size:2.5rem; margin-bottom:0.4rem;"></div>
+        <div class="score-big" id="score-frac"></div>
+        <div class="score-percent" id="score-pct"></div>
+        <div class="score-msg" id="score-msg"></div>
+    </div>
+    <div class="result-stats">
+        <div class="rstat"><div class="rstat-num" id="r-correct" style="color:var(--green)"></div><div class="rstat-label">Correct</div></div>
+        <div class="rstat"><div class="rstat-num" id="r-wrong"   style="color:var(--red)"></div><div class="rstat-label">Wrong</div></div>
+        <div class="rstat"><div class="rstat-num" id="r-pct"></div><div class="rstat-label">Score</div></div>
+    </div>
+    <h2 class="results-heading">Question Breakdown</h2>
+    <div id="breakdown"></div>
+    <div class="quiz-nav" style="margin-top:1.5rem;">
+        <button class="btn btn-outline" onclick="showScreen('screen-setup')">Change Topic</button>
+        <button class="btn" onclick="retryQuiz()">Try Again ✨</button>
+    </div>
+</div>
+
+<style>
+.slabel{font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.5rem}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.5rem}
+.topic-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .7rem;font-size:.88rem;color:var(--text);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
+.topic-btn:hover{border-color:var(--accent)}
+.topic-btn.sel{border:2px solid var(--accent);color:var(--accent);background:#1a2a3f;font-weight:600}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1rem}
+.diff-row{display:flex;gap:.4rem}
+.diff-btn{flex:1;padding:.45rem 0;font-size:.88rem;cursor:pointer;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--font);transition:all .15s}
+.diff-btn.sel{border:2px solid var(--accent);color:var(--accent);background:#1a2a3f;font-weight:600}
+.range-labels{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-top:.2rem}
+.alert-info{background:#0e1e2e;border:1px solid #2060a0;color:#80b8f0}
+.dots-loader{display:flex;justify-content:center;gap:8px;margin-bottom:1.2rem}
+.dots-loader span{width:12px;height:12px;border-radius:50%;background:var(--accent);animation:dbounce 1s infinite alternate}
+.dots-loader span:nth-child(2){animation-delay:.2s}
+.dots-loader span:nth-child(3){animation-delay:.4s}
+@keyframes dbounce{from{transform:translateY(0);opacity:.4}to{transform:translateY(-10px);opacity:1}}
+.quiz-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.quiz-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.2rem .7rem;font-size:.82rem;color:var(--muted)}
+.quiz-muted{font-size:.82rem;color:var(--muted);margin-left:auto}
+.progress-track{background:var(--surface2);border-radius:99px;height:5px;margin-bottom:1.2rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.quiz-q-num{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
+.quiz-question{font-size:1.05rem;font-weight:600;line-height:1.5;color:var(--text)}
+.opt-btn{display:flex;align-items:flex-start;gap:.75rem;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:.5rem;cursor:pointer;text-align:left;font-size:.95rem;color:var(--text);font-family:var(--font);transition:all .15s}
+.opt-btn:hover{border-color:var(--accent)}
+.opt-btn.chosen{border:2px solid var(--accent);background:#1a2a3f;color:var(--accent);font-weight:500}
+.opt-letter{font-weight:700;color:var(--accent);min-width:1.1rem;font-size:.9rem}
+.quiz-nav{display:flex;gap:.6rem;margin-top:1rem}
+.quiz-nav .btn{flex:1;text-align:center}
+.dot-nav{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+.dot-btn{width:30px;height:30px;border-radius:var(--radius);font-size:.78rem;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--font);transition:all .15s}
+.dot-btn.cur{border:2px solid var(--accent);color:var(--accent)}
+.dot-btn.ans{background:#0e2a1a;border-color:var(--green);color:var(--green)}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.5rem}
+.rstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center}
+.rstat-num{font-size:1.8rem;font-weight:600}
+.rstat-label{font-size:.8rem;color:var(--muted);margin-top:.2rem}
+@media(max-width:540px){.two-col{grid-template-columns:1fr}.topic-grid{grid-template-columns:1fr 1fr}}
+</style>
+
+<script>
+var selTopic="", selDiff="Easy", numQ=5, questions=[], answers={}, curIdx=0, ltimer=null;
+var msgs=["Consulting the engineering handbook...","Crafting perfect questions...","Building tricky distractors...","Almost ready!"];
+
+document.querySelectorAll(".topic-btn").forEach(function(b){
+    b.addEventListener("click",function(){
+        document.querySelectorAll(".topic-btn").forEach(function(x){x.classList.remove("sel")});
+        b.classList.add("sel"); selTopic=b.dataset.topic;
+        document.getElementById("custom-topic").value="";
+    });
+});
+document.querySelectorAll(".diff-btn").forEach(function(b){
+    b.addEventListener("click",function(){
+        document.querySelectorAll(".diff-btn").forEach(function(x){x.classList.remove("sel")});
+        b.classList.add("sel"); selDiff=b.dataset.diff;
+    });
+});
+document.getElementById("num-range").addEventListener("input",function(){
+    numQ=parseInt(this.value);
+    document.getElementById("num-label").textContent=numQ;
+});
+
+function showScreen(id){
+    ["screen-setup","screen-loading","screen-quiz","screen-result"].forEach(function(s){
+        document.getElementById(s).style.display=(s===id)?"block":"none";
+    });
+}
+
+function parseQuiz(text){
+    var result=[], blocks=text.split(/(?=Q\d+[:.] )/i).filter(function(b){return b.trim()});
+    for(var i=0;i<blocks.length;i++){
+        var lines=blocks[i].trim().split("\n").map(function(l){return l.trim()}).filter(Boolean);
+        if(lines.length<5) continue;
+        var qText=lines[0].replace(/^Q\d+[:.]\s*/i,"").trim();
+        var opts={}, correct="";
+        for(var j=1;j<lines.length;j++){
+            var om=lines[j].match(/^([A-D])[):.]\s*(.+)/i);
+            if(om) opts[om[1].toUpperCase()]=om[2].trim();
+            var am=lines[j].match(/answer[:\s]+([A-D])/i);
+            if(am) correct=am[1].toUpperCase();
+        }
+        if(qText && Object.keys(opts).length===4 && correct)
+            result.push({question:qText,options:opts,answer:correct});
+    }
+    return result;
+}
+
+async function generateQuiz(){
+    var apiKey=document.getElementById("api-key").value.trim();
+    var custom=document.getElementById("custom-topic").value.trim();
+    var topic=custom||selTopic;
+    var errEl=document.getElementById("setup-error");
+    errEl.style.display="none";
+    if(!apiKey){errEl.textContent="Please enter your Claude API key.";errEl.style.display="block";return}
+    if(!topic){errEl.textContent="Please select or type a topic.";errEl.style.display="block";return}
+
+    showScreen("screen-loading");
+    document.getElementById("loading-sub").textContent="Generating "+numQ+" "+selDiff.toLowerCase()+" questions on "+topic;
+    var mi=0;
+    document.getElementById("loading-msg").textContent=msgs[0];
+    ltimer=setInterval(function(){mi=(mi+1)%msgs.length;document.getElementById("loading-msg").textContent=msgs[mi]},1800);
+
+    var prompt="Generate exactly "+numQ+" multiple-choice quiz questions about \""+topic+"\" at "+selDiff+" difficulty for engineering students.\n\nFormat STRICTLY like this:\nQ1: [question]\nA) [option]\nB) [option]\nC) [option]\nD) [option]\nAnswer: [A/B/C/D]\n\nQ2: ...\n\nRules: 4 options per question, include Answer: line, no extra text.";
+
+    try{
+        var res=await fetch("https://api.anthropic.com/v1/messages",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "x-api-key":apiKey,
+                "anthropic-version":"2023-06-01",
+                "anthropic-dangerous-direct-browser-access":"true"
+            },
+            body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+        });
+        clearInterval(ltimer);
+        if(!res.ok){
+            var e=await res.json();
+            showScreen("screen-setup");
+            errEl.textContent="API error: "+(e.error&&e.error.message?e.error.message:res.statusText);
+            errEl.style.display="block"; return;
+        }
+        var data=await res.json();
+        var text=(data.content||[]).map(function(b){return b.text||""}).join("\n");
+        var parsed=parseQuiz(text);
+        if(!parsed.length){
+            showScreen("screen-setup");
+            errEl.textContent="Could not parse response. Please try again.";
+            errEl.style.display="block"; return;
+        }
+        questions=parsed; answers={}; curIdx=0;
+        document.getElementById("qlabel-topic").textContent=topic;
+        document.getElementById("qlabel-diff").textContent=selDiff;
+        renderQuiz(); showScreen("screen-quiz");
+    }catch(err){
+        clearInterval(ltimer);
+        showScreen("screen-setup");
+        errEl.textContent="Network error. Check your API key and connection.";
+        errEl.style.display="block";
+    }
+}
+
+function renderQuiz(){
+    var q=questions[curIdx], answered=Object.keys(answers).length;
+    document.getElementById("progress-fill").style.width=(answered/questions.length*100)+"%";
+    document.getElementById("qlabel-prog").textContent=answered+"/"+questions.length+" answered";
+    document.getElementById("q-num-label").textContent="Question "+(curIdx+1)+" of "+questions.length;
+    document.getElementById("q-text").textContent=q.question;
+    var c=document.getElementById("options-container"); c.innerHTML="";
+    for(var letter in q.options){
+        (function(l,t){
+            var btn=document.createElement("button");
+            btn.className="opt-btn"+(answers[curIdx]===l?" chosen":"");
+            btn.innerHTML="<span class='opt-letter'>"+l+")</span><span>"+t+"</span>";
+            btn.onclick=function(){answers[curIdx]=l;renderQuiz()};
+            c.appendChild(btn);
+        })(letter,q.options[letter]);
+    }
+    document.getElementById("prev-btn").disabled=(curIdx===0);
+    document.getElementById("next-btn").textContent=curIdx===questions.length-1?"Submit Quiz":"Next →";
+    var dn=document.getElementById("dot-nav"); dn.innerHTML="";
+    for(var i=0;i<questions.length;i++){
+        (function(idx){
+            var d=document.createElement("button");
+            d.className="dot-btn"+(idx===curIdx?" cur":"")+(answers[idx]?" ans":"");
+            d.textContent=idx+1;
+            d.onclick=function(){curIdx=idx;renderQuiz()};
+            dn.appendChild(d);
+        })(i);
+    }
+}
+
+function nextQ(){if(curIdx<questions.length-1){curIdx++;renderQuiz()}else submitQuiz()}
+function prevQ(){if(curIdx>0){curIdx--;renderQuiz()}}
+
+function submitQuiz(){
+    var score=0, details=[];
+    for(var i=0;i<questions.length;i++){
+        var ua=answers[i]||"", ok=(ua===questions[i].answer);
+        if(ok) score++;
+        details.push({q:questions[i],ua:ua,ok:ok});
+    }
+    var total=questions.length, pct=Math.round(score/total*100);
+    document.getElementById("score-emoji").textContent=pct===100?"🏆":pct>=70?"👍":pct>=40?"📖":"💪";
+    document.getElementById("score-frac").textContent=score+" / "+total;
+    document.getElementById("score-pct").textContent=pct+"%";
+    document.getElementById("score-msg").textContent=pct===100?"Perfect score! Outstanding!":pct>=70?"Great job! Keep it up!":pct>=40?"Good effort — review below.":"Keep studying — you'll get there!";
+    document.getElementById("score-card").className="score-card "+(pct>=70?"score-pass":"score-fail");
+    document.getElementById("r-correct").textContent=score;
+    document.getElementById("r-wrong").textContent=total-score;
+    document.getElementById("r-pct").textContent=pct+"%";
+    var bd=document.getElementById("breakdown"); bd.innerHTML="";
+    details.forEach(function(r,i){
+        var div=document.createElement("div");
+        div.className="result-item "+(r.ok?"result-correct":"result-wrong");
+        var ua=r.ua?r.ua+") "+(r.q.options[r.ua]||""):"Not answered";
+        var cor=r.q.answer+") "+r.q.options[r.q.answer];
+        div.innerHTML="<p class='result-q'><strong>Q"+(i+1)+":</strong> "+r.q.question+"</p><p style='font-size:.88rem;margin-top:.3rem;'>Your answer: <strong>"+ua+"</strong>"+(r.ok?" ✅":" &nbsp;|&nbsp; Correct: <strong>"+cor+"</strong>")+"</p>";
+        bd.appendChild(div);
+    });
+    showScreen("screen-result");
+}
+
+function retryQuiz(){answers={};curIdx=0;renderQuiz();showScreen("screen-quiz")}
+</script>
+
+{% endblock %}
